@@ -31,7 +31,7 @@ class VirtualMouse:
         # 初始化OpenCV对象，为了获取usb摄像头的图像
         cap = cv2.VideoCapture(0)
         # 视频分辨率
-        resize_w = 960
+        resize_w = 1280
         resize_h = 720
 
         # 控制边距
@@ -113,7 +113,11 @@ class VirtualMouse:
                     except:
                         pass
                 elif action_zh == '单击准备':
-                    pass
+                    try:
+                        autopy.mouse.move(finalX, finalY)
+                    except:
+                        pass
+                    # pass
                 elif action_zh == '触发单击' and (now - action_trigger_time['single_click'] > 0.3):
                     pyautogui.click()
                     action_trigger_time['single_click'] = now

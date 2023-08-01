@@ -23,6 +23,8 @@ class HandProcess:
                                          max_num_hands=max_num_hands)
         # 初始化一个列表来存储
         self.landmark_list = []
+        self.landmark_world_list = []
+        self.landmark_distance_list = []
         # 定义所有的手势动作对应的鼠标操作
         self.action_labels = {
             'none': '无',
@@ -131,6 +133,18 @@ class HandProcess:
 
         return img, action, key_point
 
+    def distance(self, lm1, lm2):
+        x = lm1.x - lm2.x
+        y = lm1.y - lm2.y
+        z = lm1.z - lm2.z
+        return math.sqrt(x ** 2 + y ** 2 + z ** 2)
+
+    def lm_distance(self):
+        self.landmark_distance_list = []
+        lm0 = self.landmark_world_list[0]
+        for j, lm in enumerate(self.landmark_world_list):
+            self.landmark_distance_list.append(self.distance(lm, lm0))
+
     # 返回向上手指的数组
     def checkFingersUp(self):
 
@@ -139,15 +153,20 @@ class HandProcess:
         if len(self.landmark_list) == 0:
             return upList
 
-        # 拇指，比较x坐标
-        if self.landmark_list[fingerTipIndexs[0]][1] < self.landmark_list[fingerTipIndexs[0] - 1][1]:
+        self.lm_distance()
+
+        # 拇指，比较距17点的距离
+        dis1 = self.distance(self.landmark_world_list[fingerTipIndexs[0]], self.landmark_world_list[17])
+        dis2 = self.distance(self.landmark_world_list[fingerTipIndexs[0]-1], self.landmark_world_list[17])
+        print(dis1, dis2)
+        if dis1 > dis2:
             upList.append(1)
         else:
             upList.append(0)
 
-        # 其他指头，比较Y坐标
+        # 其他指头，比较距手掌根部的距离
         for i in range(1, 5):
-            if self.landmark_list[fingerTipIndexs[i]][2] < self.landmark_list[fingerTipIndexs[i] - 2][2]:
+            if self.landmark_distance_list[fingerTipIndexs[i]] > self.landmark_distance_list[fingerTipIndexs[i] - 2]:
                 upList.append(1)
             else:
                 upList.append(0)
@@ -160,39 +179,47 @@ class HandProcess:
 
         results = self.hands.process(img)
         self.landmark_list = []
+        self.landmark_world_list = []
+        curr_i = -1
 
         if results.multi_hand_landmarks:
+            for i, item in enumerate(results.multi_handedness):
+                if item.classification[0].label == "Right":
+                    curr_i = i
+                    break
+            if curr_i == -1:
+                return img
 
-            for hand_index, hand_landmarks in enumerate(results.multi_hand_landmarks):
+            hand_landmarks = results.multi_hand_landmarks[curr_i]
+            self.landmark_world_list = results.multi_hand_world_landmarks[curr_i].landmark
 
-                if drawLandmarks:
-                    self.mp_drawing.draw_landmarks(
-                        img,
-                        hand_landmarks,
-                        self.mp_hands.HAND_CONNECTIONS,
-                        self.mp_drawing_styles.get_default_hand_landmarks_style(),
-                        self.mp_drawing_styles.get_default_hand_connections_style())
+            if drawLandmarks:
+                self.mp_drawing.draw_landmarks(
+                    img,
+                    hand_landmarks,
+                    self.mp_hands.HAND_CONNECTIONS,
+                    self.mp_drawing_styles.get_default_hand_landmarks_style(),
+                    self.mp_drawing_styles.get_default_hand_connections_style())
 
-                # 遍历landmark
+            # 遍历landmark
+            for landmark_id, finger_axis in enumerate(hand_landmarks.landmark):
+                h, w, c = img.shape
+                p_x, p_y = math.ceil(finger_axis.x * w), math.ceil(finger_axis.y * h)
 
-                for landmark_id, finger_axis in enumerate(hand_landmarks.landmark):
-                    h, w, c = img.shape
-                    p_x, p_y = math.ceil(finger_axis.x * w), math.ceil(finger_axis.y * h)
+                self.landmark_list.append([
+                    landmark_id, p_x, p_y,
+                    finger_axis.z
+                ])
 
-                    self.landmark_list.append([
-                        landmark_id, p_x, p_y,
-                        finger_axis.z
-                    ])
+            # 框框和label
+            if drawBox:
+                x_min, x_max = min(self.landmark_list, key=lambda i: i[1])[1], \
+                max(self.landmark_list, key=lambda i: i[1])[1]
+                y_min, y_max = min(self.landmark_list, key=lambda i: i[2])[2], \
+                max(self.landmark_list, key=lambda i: i[2])[2]
 
-                # 框框和label
-                if drawBox:
-                    x_min, x_max = min(self.landmark_list, key=lambda i: i[1])[1], \
-                    max(self.landmark_list, key=lambda i: i[1])[1]
-                    y_min, y_max = min(self.landmark_list, key=lambda i: i[2])[2], \
-                    max(self.landmark_list, key=lambda i: i[2])[2]
-
-                    img = cv2.rectangle(img, (x_min - 30, y_min - 30), (x_max + 30, y_max + 30), (0, 255, 0), 2)
-                    img = utils.cv2AddChineseText(img, self.action_deteted, (x_min - 20, y_min - 120),
-                                                  textColor=(255, 0, 255), textSize=60)
+                img = cv2.rectangle(img, (x_min - 30, y_min - 30), (x_max + 30, y_max + 30), (0, 255, 0), 2)
+                img = utils.cv2AddChineseText(img, self.action_deteted, (x_min - 20, y_min - 120),
+                                              textColor=(255, 0, 255), textSize=60)
 
         return img

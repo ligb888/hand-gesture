@@ -7,7 +7,7 @@ import autopy
 # （1）导数视频数据
 wScr, hScr = autopy.screen.size()  # 返回电脑屏幕的宽和高(1920.0, 1080.0)
 wCam, hCam = 1280, 720  # 视频显示窗口的宽和高
-pt1, pt2 = (100, 100), (1100, 500)  # 虚拟鼠标的移动范围，左上坐标pt1，右下坐标pt2
+pt1, pt2 = (100, 300), (1180, 620)  # 虚拟鼠标的移动范围，左上坐标pt1，右下坐标pt2
 
 cap = cv2.VideoCapture(0)  # 0代表自己电脑的摄像头
 cap.set(3, wCam)  # 设置显示框的宽度1280
@@ -33,7 +33,7 @@ while True:
 
     # 翻转图像，使自身和摄像头中的自己呈镜像关系
     img = cv2.flip(img, flipCode=1)  # 1代表水平翻转，0代表竖直翻转
-
+    img = cv2.resize(img, (wCam, hCam))
     # 在图像窗口上创建一个矩形框，在该区域内移动鼠标
     cv2.rectangle(img, pt1, pt2, (0, 255, 255), 5)
 
@@ -56,6 +56,34 @@ while True:
         fingers = detector.fingersUp(hands[0])  # 传入
         # print(fingers) 返回 [0,1,1,0,0] 代表 只有食指和中指竖起
 
+        # （9）如果食指和中指都竖起，指尖距离小于某个值认为是点击鼠标
+        # if fingers[1] == 1 and fingers[2] == 1:  # 食指和中指都竖起
+        #
+        #     # 计算食指尖和中指尖之间的距离distance,绘制好了的图像img,指尖连线的信息info
+        #     distance, info, img = detector.findDistance((x1, y1), (x2, y2), img)
+        #     # print(distance)
+        #
+        #     # 当指间距离小于50（像素距离）就认为是点击鼠标
+        #     if distance < 50:
+        #         # 在食指尖画个绿色的圆，表示点击鼠标
+        #         cv2.circle(img, (x1, y1), 15, (0, 255, 0), cv2.FILLED)
+        #
+        #         # 点击鼠标
+        #         autopy.mouse.click()
+        # if fingers[0] == 1 and fingers[1] == 1:  # 大拇指和食指都竖起
+        #
+        #     # 计算食指尖和中指尖之间的距离distance,绘制好了的图像img,指尖连线的信息info
+        #     distance, info, img = detector.findDistance((x1, y1), (x2, y2), img)
+        #     # print(distance)
+        #
+        #     # 当指间距离小于50（像素距离）就认为是点击鼠标
+        #     if distance < 50:
+        #         # 在食指尖画个绿色的圆，表示点击鼠标
+        #         cv2.circle(img, (x1, y1), 15, (0, 255, 0), cv2.FILLED)
+        #
+        #         # 点击鼠标
+        #         autopy.mouse.click()
+
         # 如果食指竖起且中指弯下，就认为是移动鼠标
         if fingers[1] == 1 and fingers[2] == 0:
             # 开始移动时，在食指指尖画一个圆圈，看得更清晰一些
@@ -75,21 +103,6 @@ while True:
 
             # 更新前一帧的鼠标所在位置坐标，将当前帧鼠标所在位置，变成下一帧的鼠标前一帧所在位置
             pLocx, pLocy = cLocx, cLocy
-
-        # （9）如果食指和中指都竖起，指尖距离小于某个值认为是点击鼠标
-        if fingers[1] == 1 and fingers[2] == 1:  # 食指和中指都竖起
-
-            # 计算食指尖和中指尖之间的距离distance,绘制好了的图像img,指尖连线的信息info
-            distance, info, img = detector.findDistance((x1, y1), (x2, y2), img)
-            # print(distance)
-
-            # 当指间距离小于50（像素距离）就认为是点击鼠标
-            if distance < 50:
-                # 在食指尖画个绿色的圆，表示点击鼠标
-                cv2.circle(img, (x1, y1), 15, (0, 255, 0), cv2.FILLED)
-
-                # 点击鼠标
-                autopy.mouse.click()
 
     # （10）显示图像
     # 查看FPS
