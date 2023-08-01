@@ -74,7 +74,6 @@ def moved(history):
     for i, item in enumerate(last):
         if len(item) == 0:
             continue
-        # arr.append(item[1][4])
         arr.append(item[3].y)
         arr_z.append(item[3].z)
         arr_x.append(item[3].x)
@@ -89,36 +88,32 @@ def moved(history):
         dis = distance(item, arr_2[0])
         arr_dis.append(dis)
 
-    z = abs(np.mean(arr_z))
-    if z > 0.1:
-        z = 0.1
-    zp = 0.1 / z
-    map(lambda x: x * zp, arr)
-    map(lambda x: x * zp, arr_x)
-
-    ma = np.max(arr_x)
-    mi = np.min(arr_x)
-    if ma - mi < 0.05:
-        avg = np.mean(arr)
+    print(arr_dis)
+    ma = np.max(arr_dis)
+    mi = np.min(arr_dis)
+    if ma - mi > 0.01:
+        avg = np.mean(arr_dis)
         # 低点数组
         low_arr = []
         # 当前低点
         low = 0
-        for i, item in enumerate(arr):
+        for i, item in enumerate(arr_dis):
             # 稳定帧计数
             if item < avg:
                 count += 1
+            else:
+                count = 0
 
             # 点击帧统计
-            if item < avg and low != 0 and low - avg > 0.02:
+            if item < avg and low != 0 and low - avg > 0.005:
                 low_arr.append(low)
                 low = 0
             elif item > avg and item > low:
                 low = item
 
-        if count > 5 and len(low_arr) == 1:
+        if count > 8 and len(low_arr) == 1:
             mode = "click"
-        elif count > 5 and len(low_arr) == 2:
+        elif count > 8 and len(low_arr) == 2:
             mode = "double"
     else:
         # 判断是否移动
@@ -136,32 +131,6 @@ def moved(history):
                     count = 0
             if count > 8:
                 mode = "move"
-
-        # if len(arr) == 0:
-        #     return []
-        # avg = np.mean(arr)
-        # # 低点数组
-        # low_arr = []
-        # # 当前低点
-        # low = 1
-        # for i, item in enumerate(arr):
-        #     # 稳定帧计数
-        #     if item > avg:
-        #         count += 1
-        #     else:
-        #         count = 0
-        #
-        #     # 点击帧统计
-        #     if item > avg and low != 1 and avg - low > 0.005:
-        #         low_arr.append(low)
-        #         low = 1
-        #     elif item < avg and item < low:
-        #         low = item
-        #
-        # if count > 5 and len(low_arr) == 1:
-        #     mode = "click"
-        # elif count > 5 and len(low_arr) == 2:
-        #     mode = "double"
     return [mode, move]
 
 
@@ -181,7 +150,7 @@ def get_data(history):
             distance_data = lm_distance(landmark)
             mode = gesture(landmark, distance_data)
             record = [mode, distance_data, landmark[4], landmark2[4]]
-            print(landmark2[4].x, landmark2[4].y)
+            # print(landmark[4].x, landmark[4].y)
     except:
         print("获取数据出错" + traceback.format_exc())
     finally:
