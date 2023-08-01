@@ -25,6 +25,8 @@ class HandProcess:
         self.landmark_list = []
         self.landmark_world_list = []
         self.landmark_distance_list = []
+        # 历史手势
+        self.action_history = []
         # 定义所有的手势动作对应的鼠标操作
         self.action_labels = {
             'none': '无',
@@ -94,8 +96,8 @@ class HandProcess:
             return img, action, None
 
         # 侦测距离
-        dete_dist = 100
-        # 中指
+        dete_dist = 50
+        # 食指
         key_point = self.getFingerXY(8)
 
         # 移动模式：单个食指在上，鼠标跟随食指指尖移动，需要smooth处理防抖
@@ -131,12 +133,26 @@ class HandProcess:
 
         self.action_deteted = self.action_labels[action]
 
+        self.action_history.append(action)
+        if len(self.action_history) > 100:
+            self.action_history = self.action_history[:-30]
+        if action == "move":
+            flag = True
+            action_last_arr = self.action_history[-5:]
+            for i, item in enumerate(action_last_arr):
+                if item != action:
+                    flag = False
+                    break
+            if not flag:
+                action = "none"
         return img, action, key_point
 
     def distance(self, lm1, lm2):
         x = lm1.x - lm2.x
         y = lm1.y - lm2.y
-        z = lm1.z - lm2.z
+        z = 0
+        if lm1.z is not None:
+            z = lm1.z - lm2.z
         return math.sqrt(x ** 2 + y ** 2 + z ** 2)
 
     def lm_distance(self):
@@ -156,9 +172,10 @@ class HandProcess:
         self.lm_distance()
 
         # 拇指，比较距17点的距离
-        dis1 = self.distance(self.landmark_world_list[fingerTipIndexs[0]], self.landmark_world_list[17])
-        dis2 = self.distance(self.landmark_world_list[fingerTipIndexs[0]-1], self.landmark_world_list[17])
-        print(dis1, dis2)
+        dis1 = self.distance(self.landmark_world_list[fingerTipIndexs[0]], self.landmark_world_list[17]) - 0.02
+        dis2 = self.distance(self.landmark_world_list[fingerTipIndexs[0]-2], self.landmark_world_list[17])
+        # dis1 = (self.landmark_list[fingerTipIndexs[0]][0] - self.landmark_list[17][0]) ** 2 + (self.landmark_list[fingerTipIndexs[0]][1] - self.landmark_list[17][1]) ** 2
+        # dis2 = (self.landmark_list[fingerTipIndexs[0]-2][0] - self.landmark_list[17][0]) ** 2 + (self.landmark_list[fingerTipIndexs[0]-2][1] - self.landmark_list[17][1]) ** 2
         if dis1 > dis2:
             upList.append(1)
         else:

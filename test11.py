@@ -30,12 +30,9 @@ class VirtualMouse:
         fpsTime = time.time()
         # 初始化OpenCV对象，为了获取usb摄像头的图像
         cap = cv2.VideoCapture(0)
-        # 视频分辨率
-        resize_w = 1280
-        resize_h = 720
-
-        # 控制边距
-        frameMargin = 100
+        wScr, hScr = autopy.screen.size()  # 返回电脑屏幕的宽和高(1920.0, 1080.0)
+        wCam, hCam = 1280, 720  # 视频显示窗口的宽和高
+        pt1, pt2 = (200, 200), (1080, 520)  # 虚拟鼠标的移动范围，左上坐标pt1，右下坐标pt2
 
         # 利用pyautogui库获取屏幕尺寸
         screenWidth, screenHeight = pyautogui.size()
@@ -43,7 +40,7 @@ class VirtualMouse:
         # 柔和处理参数，使鼠标运动平滑
         stepX, stepY = 0, 0
         finalX, finalY = 0, 0
-        smoothening = 7
+        smoothening = 4
         # 事件触发需要的时间，初始化为0
         action_trigger_time = {
             'single_click':0,
@@ -52,12 +49,13 @@ class VirtualMouse:
         }
         # 用此变量记录鼠标是否处于按下状态
         mouseDown = False
+        action_last = ""
         while cap.isOpened():#只要相机持续打开，则不间断循环
             action_zh = ''
             # 获取视频的一帧图像，返回值两个。第一个为判断视频是否成功获取。第二个为获取的图像，若未成功获取，返回none
             success, self.image = cap.read()
             # 修改图片大小
-            self.image = cv2.resize(self.image, (resize_w, resize_h))
+            self.image = cv2.resize(self.image, (wCam, hCam))
             # 视频获取为空的话，进行下一次循环，重新捕捉画面
             if not success:
                 print("空帧")
@@ -73,7 +71,7 @@ class VirtualMouse:
             self.image = handprocess.processOneHand(self.image)
 
             # 将手框出来
-            cv2.rectangle(self.image, (frameMargin, frameMargin), (resize_w - frameMargin, resize_h - frameMargin),(255, 0, 255), 2)
+            cv2.rectangle(self.image, pt1, pt2, (0, 255, 255), 5)
 
             # 调用手势识别文件获取手势动作
             self.image,action,key_point = handprocess.checkHandAction(self.image,drawKeyFinger=True)
@@ -84,8 +82,11 @@ class VirtualMouse:
                 # np.interp为插值函数，简而言之，看key_point[0]的值在(frameMargin, resize_w - frameMargin)中所占比例，
                 # 然后去(0, screenWidth)中线性寻找相应的值，作为返回值
                 # 利用插值函数，输入手势食指的位置，找到其在框中的百分比，等比例映射到
-                x3 = np.interp(key_point[0], (frameMargin, resize_w - frameMargin), (0, screenWidth))
-                y3 = np.interp(key_point[1], (frameMargin, resize_h - frameMargin), (0, screenHeight))
+                # x3 = np.interp(key_point[0], (frameMargin, resize_w - frameMargin), (0, screenWidth))
+                # y3 = np.interp(key_point[1], (frameMargin, resize_h - frameMargin), (0, screenHeight))
+
+                x3 = np.interp(key_point[0], (pt1[0], pt2[0]), (0, wScr))
+                y3 = np.interp(key_point[1], (pt1[1], pt2[1]), (0, hScr))
 
                 # 柔和处理,通过限制步长，让鼠标移动平滑
                 finalX = stepX + (x3 - stepX) / smoothening
@@ -103,9 +104,7 @@ class VirtualMouse:
                     # 如果鼠标上一个状态是点击，则判断为放开鼠标左键
                     if mouseDown:
                         pyautogui.mouseUp(button='left')
-
                     mouseDown = False
-
                 # 根据识别得到的鼠标手势，控制鼠标做出相应的动作
                 if action_zh == '鼠标移动':
                     try:
@@ -113,16 +112,9 @@ class VirtualMouse:
                     except:
                         pass
                 elif action_zh == '单击准备':
-                    try:
-                        autopy.mouse.move(finalX, finalY)
-                    except:
-                        pass
-                    # pass
-                elif action_zh == '触发单击' and (now - action_trigger_time['single_click'] > 0.3):
+                    pass
+                elif action_zh == '触发单击' and action_last != action_zh:
                     pyautogui.click()
-                    action_trigger_time['single_click'] = now
-
-
                 elif action_zh == '右击准备':
                     pass
                 elif action_zh == '触发右击' and (now - action_trigger_time['right_click'] > 2):
@@ -136,6 +128,8 @@ class VirtualMouse:
 
                 stepX, stepY = finalX, finalY
 
+            action_last = action_zh
+            print(action_zh)
             self.image.flags.writeable = True
             self.image = cv2.cvtColor(self.image, cv2.COLOR_RGB2BGR)
 
