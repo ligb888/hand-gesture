@@ -1,12 +1,8 @@
-# 更多疑问，欢迎私信交流。thujiang000
-# 导入OpenCV
 import cv2
-# 导入mediapipe
 import mediapipe as mp
-import time
 import math
-import numpy as np
 from utils import Utils
+import logging
 
 
 class HandProcess:
@@ -110,9 +106,13 @@ class HandProcess:
             action = 'click_single_active' if l1 < dete_dist else 'click_single_ready'
 
             # 右击：食指、中指出现暂停移动，如果两指捏合，触发右击
+            # 暂改为拖动
         if (upList == [0, 1, 1, 0, 0]):
-            l1 = self.getDistance(self.getFingerXY(8), self.getFingerXY(12))
-            action = 'click_right_active' if l1 < dete_dist else 'click_right_ready'
+            # l1 = self.getDistance(self.getFingerXY(8), self.getFingerXY(12))
+            # action = 'click_right_active' if l1 < dete_dist else 'click_right_ready'
+            key_point = self.getFingerXY(12)
+            action = 'drag'
+
 
         # 向上滑：五指向上
         if (upList == [1, 1, 1, 1, 1]):
@@ -123,10 +123,11 @@ class HandProcess:
             action = 'scroll_down'
 
         # 拖拽：拇指、食指外的三指向上
-        if (upList == [0, 0, 1, 1, 1]):
-            # 换成中指
-            key_point = self.getFingerXY(12)
-            action = 'drag'
+        # 暂改为两指拖动
+        # if (upList == [0, 0, 1, 1, 1]):
+        #     # 换成中指
+        #     key_point = self.getFingerXY(12)
+        #     action = 'drag'
 
         # 根据动作绘制相关点
         img = self.drawInfo(img, action) if drawKeyFinger else img
@@ -191,7 +192,7 @@ class HandProcess:
         return upList
 
     # 分析手指的位置，得到手势动作
-    def processOneHand(self, img, drawBox=True, drawLandmarks=True):
+    def processOneHand(self, img, show=True):
         utils = Utils()
 
         results = self.hands.process(img)
@@ -210,7 +211,7 @@ class HandProcess:
             hand_landmarks = results.multi_hand_landmarks[curr_i]
             self.landmark_world_list = results.multi_hand_world_landmarks[curr_i].landmark
 
-            if drawLandmarks:
+            if show:
                 self.mp_drawing.draw_landmarks(
                     img,
                     hand_landmarks,
@@ -229,7 +230,7 @@ class HandProcess:
                 ])
 
             # 框框和label
-            if drawBox:
+            if show:
                 x_min, x_max = min(self.landmark_list, key=lambda i: i[1])[1], \
                 max(self.landmark_list, key=lambda i: i[1])[1]
                 y_min, y_max = min(self.landmark_list, key=lambda i: i[2])[2], \
