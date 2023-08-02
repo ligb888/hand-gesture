@@ -1,0 +1,1 @@
+pyinstaller main.py --name="hand-gesture" --add-data="config.ini;." --add-data="venv/Lib/site-packages/mediapipe/modules;mediapipe/modules" -w

@@ -23,6 +23,8 @@ python main.py
 [common]
 # 摄像头索引
 index = 0
+# 识别左手还是右手，（如果识别到多只左手或右手，会选取第一只识别到的手）
+hand = Right
 # 鼠标移动平滑参数
 smooth = 4
 # 是否显示图像，0否1是

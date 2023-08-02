@@ -1,2 +1,5 @@
 /.idea/
 /logs/
+/build/
+/dist/
+*.spec

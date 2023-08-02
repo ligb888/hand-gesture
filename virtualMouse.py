@@ -10,10 +10,11 @@ import logging
 
 # 识别控制类
 class VirtualMouse:
-    def __init__(self, index=0, show=False):
+    def __init__(self, index=0, hand="Right", show=False):
         # image实例，以便另一个类调用
         self.image = None
         self.index = index
+        self.hand = hand
         self.show = show
 
     # 主函数
@@ -62,7 +63,7 @@ class VirtualMouse:
             # 将BGR格式存储的图片转为RGB
             self.image = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
             # 使用mediapipe，将图像输入手指检测模型，得到结果
-            self.image = handprocess.processOneHand(self.image, self.show)
+            self.image = handprocess.processOneHand(self.image, self.hand, self.show)
 
             # 调用手势识别文件获取手势动作
             self.image, action, key_point = handprocess.checkHandAction(self.image,drawKeyFinger=True)

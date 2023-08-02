@@ -2,7 +2,6 @@ import cv2
 import mediapipe as mp
 import math
 from utils import Utils
-import logging
 
 
 class HandProcess:
@@ -192,7 +191,7 @@ class HandProcess:
         return upList
 
     # 分析手指的位置，得到手势动作
-    def processOneHand(self, img, show=True):
+    def processOneHand(self, img, hand, show=True):
         utils = Utils()
 
         results = self.hands.process(img)
@@ -202,7 +201,7 @@ class HandProcess:
 
         if results.multi_hand_landmarks:
             for i, item in enumerate(results.multi_handedness):
-                if item.classification[0].label == "Right":
+                if item.classification[0].label == hand:
                     curr_i = i
                     break
             if curr_i == -1:

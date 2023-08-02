@@ -1,3 +1,4 @@
+import time
 import traceback
 import utils
 from virtualMouse import VirtualMouse
@@ -13,6 +14,7 @@ if __name__ == '__main__':
     try:
         config.read('config.ini')
         index = int(config['common']['index'])
+        hand = config['common']['hand']
         smooth = int(config['common']['smooth'])
         show = config['common']['show'] == "1"
         crop1_arr = config['common']['crop1'].split(",")
@@ -24,9 +26,8 @@ if __name__ == '__main__':
         pt2_arr = config['common']['pt2'].split(",")
         pt2 = (int(pt2_arr[0]), int(pt2_arr[1]))
 
-        control = VirtualMouse(index, show)
+        control = VirtualMouse(index, hand, show)
         control.recognize(crop1, crop2, pt1, pt2, smooth)
     except:
         logging.info("读取配置出错：" + traceback.format_exc())
         exit()
-
