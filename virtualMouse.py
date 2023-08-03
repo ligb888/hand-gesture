@@ -18,7 +18,7 @@ class VirtualMouse:
         self.show = show
 
     # 主函数
-    def recognize(self, crop1, crop2, pt1, pt2, smooth):
+    def recognize(self, crop1, crop2, w, h, pt1, pt2, smooth):
         # 调用手势识别类
         handprocess = handProcess.HandProcess(False, 1)
         # 初始化基础工具：绘制图像，绘制文本等
@@ -40,7 +40,8 @@ class VirtualMouse:
         action_trigger_time = {
             'single_click': 0,
             'double_click': 0,
-            'right_click': 0
+            'right_click': 0,
+            'enter': 0
         }
         # 用此变量记录鼠标是否处于按下状态
         mouseDown = False
@@ -53,30 +54,25 @@ class VirtualMouse:
                 logging.info("空帧")
                 continue
 
-            # 将图片格式设置为只读状态，可以提高图片格式转化的速度
-            self.image.flags.writeable = False
             # 镜像，需要根据镜头位置来调整
             self.image = cv2.flip(self.image, 1)
             # 截图部分区域，进行手势识别
             if crop2 != (0, 0):
                 self.image = self.image[crop1[1]:crop2[1], crop1[0]:crop2[0]]
+            self.image = cv2.resize(self.image, (w, h))
+            # 将图片格式设置为只读状态，可以提高图片格式转化的速度
+            self.image.flags.writeable = False
             # 将BGR格式存储的图片转为RGB
             self.image = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
             # 使用mediapipe，将图像输入手指检测模型，得到结果
             self.image = handprocess.processOneHand(self.image, self.hand, self.show)
 
             # 调用手势识别文件获取手势动作
-            self.image, action, key_point = handprocess.checkHandAction(self.image,drawKeyFinger=True)
+            self.image, action, key_point = handprocess.checkHandAction(self.image, drawKeyFinger=True)
             # 通过手势识别得到手势动作，将其画在图像上显示
             action_zh = handprocess.action_labels[action]
 
             if key_point:
-                # np.interp为插值函数，简而言之，看key_point[0]的值在(frameMargin, resize_w - frameMargin)中所占比例，
-                # 然后去(0, screenWidth)中线性寻找相应的值，作为返回值
-                # 利用插值函数，输入手势食指的位置，找到其在框中的百分比，等比例映射到
-                # x3 = np.interp(key_point[0], (frameMargin, resize_w - frameMargin), (0, screenWidth))
-                # y3 = np.interp(key_point[1], (frameMargin, resize_h - frameMargin), (0, screenHeight))
-
                 x3 = np.interp(key_point[0], (pt1[0], pt2[0]), (0, wScr))
                 y3 = np.interp(key_point[1], (pt1[1], pt2[1]), (0, hScr))
 
@@ -97,6 +93,11 @@ class VirtualMouse:
                     if mouseDown:
                         pyautogui.mouseUp(button='left')
                         mouseDown = False
+                # 回车
+                if action_zh == '回车' and action_last != action_zh \
+                        and (now - action_trigger_time['enter'] > 1):
+                    pyautogui.press('enter')
+                    action_trigger_time['enter'] = now
                 # 根据识别得到的鼠标手势，控制鼠标做出相应的动作
                 if action_zh == '鼠标移动':
                     autopy.mouse.move(finalX, finalY)
@@ -106,10 +107,10 @@ class VirtualMouse:
                     pyautogui.click()
                 elif action_zh == '右击准备':
                     pass
-                elif action_zh == '触发右击' and (now - action_trigger_time['right_click'] > 2):
+                elif action_zh == '触发右击' and action_last != action_zh \
+                        and (now - action_trigger_time['right_click'] > 1):
                     pyautogui.click(button='right')
                     action_trigger_time['right_click'] = now
-
                 elif action_zh == '向上滑页':
                     pyautogui.scroll(30)
                 elif action_zh == '向下滑页':

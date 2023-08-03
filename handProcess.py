@@ -32,7 +32,8 @@ class HandProcess:
             'click_right_ready': '右击准备',
             'scroll_up': '向上滑页',
             'scroll_down': '向下滑页',
-            'drag': '鼠标拖拽'
+            'drag': '鼠标拖拽',
+            'enter': '回车'
         }
         self.action_deteted = ''
 
@@ -96,34 +97,40 @@ class HandProcess:
         key_point = self.getFingerXY(8)
 
         # 移动模式：单个食指在上，鼠标跟随食指指尖移动，需要smooth处理防抖
-        if (upList == [0, 1, 0, 0, 0]):
+        if upList == [0, 1, 0, 0, 0]:
             action = 'move'
 
         # 单击：食指与拇指出现暂停移动，如果两指捏合，触发单击
-        if (upList == [1, 1, 0, 0, 0]):
+        if upList == [1, 1, 0, 0, 0]:
             l1 = self.getDistance(self.getFingerXY(4), self.getFingerXY(8))
             action = 'click_single_active' if l1 < dete_dist else 'click_single_ready'
 
             # 右击：食指、中指出现暂停移动，如果两指捏合，触发右击
             # 暂改为拖动
-        if (upList == [0, 1, 1, 0, 0]):
+        if upList == [0, 1, 1, 0, 0]:
             # l1 = self.getDistance(self.getFingerXY(8), self.getFingerXY(12))
             # action = 'click_right_active' if l1 < dete_dist else 'click_right_ready'
-            key_point = self.getFingerXY(12)
             action = 'drag'
 
+        # 右击：大拇指加食指、中指
+        if upList == [1, 1, 1, 0, 0]:
+            action = 'click_right_active'
 
-        # 向上滑：五指向上
-        if (upList == [1, 1, 1, 1, 1]):
+        # 向上滑：四指向上
+        if upList == [0, 1, 1, 1, 1]:
             action = 'scroll_up'
 
-        # 向下滑：除拇指外四指向上
-        if (upList == [0, 1, 1, 1, 1]):
+        # 向下滑：三指向上
+        if upList == [0, 0, 1, 1, 1]:
             action = 'scroll_down'
+
+        # 回车：五指
+        # if upList == [1, 1, 1, 1, 1]:
+        #     action = 'enter'
 
         # 拖拽：拇指、食指外的三指向上
         # 暂改为两指拖动
-        # if (upList == [0, 0, 1, 1, 1]):
+        # if upList == [0, 0, 1, 1, 1]:
         #     # 换成中指
         #     key_point = self.getFingerXY(12)
         #     action = 'drag'
