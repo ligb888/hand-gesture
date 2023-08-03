@@ -1,5 +1,4 @@
 import math
-import time
 import traceback
 import utils
 from virtualMouse import VirtualMouse
@@ -30,6 +29,9 @@ if __name__ == '__main__':
         crop2 = (int(crop2_arr[0]), int(crop2_arr[1]))
         if crop2 != (0, 0) and not math.isclose((crop2[0] - crop1[0]) / (crop2[1] - crop1[1]), 16/9, abs_tol=0.05):
             messagebox.showerror("错误", "截取范围长宽比必须为16:9")
+            exit()
+        elif crop2 != (0, 0) and crop2[0] - crop1[0] < 500:
+            messagebox.showerror("错误", "截取范围分辨率太低")
             exit()
         # pt1_arr = config['common']['pt1'].split(",")
         # pt1 = (int(pt1_arr[0]), int(pt1_arr[1]))

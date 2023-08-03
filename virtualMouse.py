@@ -1,3 +1,5 @@
+import math
+
 import cv2
 import handProcess
 import time
@@ -6,6 +8,7 @@ import pyautogui
 from utils import Utils
 import autopy
 import logging
+from tkinter import messagebox
 
 
 # 识别控制类
@@ -34,6 +37,12 @@ class VirtualMouse:
         hCam = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         logging.info(rf"屏幕分辨率：{wScr},{hScr}")
         logging.info(rf"摄像头分辨率：{wCam},{hCam}")
+        if crop2 == (0, 0) and not math.isclose(wCam/hCam, 16/9, abs_tol=0.05):
+            messagebox.showerror("错误", "摄像头的长宽比不是16:9，请截取16:9的范围")
+            exit()
+        elif crop2 == (0, 0) and wCam < 500:
+            messagebox.showerror("错误", "摄像头分辨率太低")
+            exit()
         # 柔和处理参数，使鼠标运动平滑
         stepX, stepY = 0, 0
         # 事件触发需要的时间，初始化为0
