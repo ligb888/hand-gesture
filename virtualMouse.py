@@ -13,10 +13,11 @@ from tkinter import messagebox
 
 # 识别控制类
 class VirtualMouse:
-    def __init__(self, index=0, hand="Right", show=False):
+    def __init__(self, index=0, rtsp="", hand="Right", show=False):
         # image实例，以便另一个类调用
         self.image = None
         self.index = index
+        self.rtsp = rtsp
         self.hand = hand
         self.show = show
 
@@ -29,7 +30,10 @@ class VirtualMouse:
         # 计时，用于帧率计算
         fpsTime = time.time()
         # 初始化OpenCV对象，为了获取usb摄像头的图像
-        cap = cv2.VideoCapture(self.index)
+        if self.index == -1:
+            cap = cv2.VideoCapture(self.rtsp)
+        else:
+            cap = cv2.VideoCapture(self.index)
         # 返回电脑屏幕的宽和高(1920.0, 1080.0)
         wScr, hScr = autopy.screen.size()
         # 获取视频宽度、高度
@@ -37,7 +41,7 @@ class VirtualMouse:
         hCam = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         logging.info(rf"屏幕分辨率：{wScr},{hScr}")
         logging.info(rf"摄像头分辨率：{wCam},{hCam}")
-        if crop2 == (0, 0) and not math.isclose(wCam/hCam, 16/9, abs_tol=0.05):
+        if crop2 == (0, 0) and not math.isclose(wCam/hCam, 16/9, abs_tol=0.2):
             messagebox.showerror("错误", "摄像头的长宽比不是16:9，请截取16:9的范围")
             exit()
         elif crop2 == (0, 0) and wCam < 500:

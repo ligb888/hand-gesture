@@ -26,15 +26,17 @@ python main.py
 配置参数在config.ini中，具体参数如下
 ```ini
 [common]
-# 摄像头索引
+# 摄像头索引，设置为-1时使用rtsp推流
 index = 0
+# rtsp推流地址
+rtsp = rtsp://{self.user}:{self.pwd}@{self.ip}/cam/realmonitor?channel=1&subtype=0
 # 识别左手还是右手，（如果识别到多只左手或右手，会选取第一只识别到的手）
 hand = Right
 # 鼠标移动平滑参数
 smooth = 4
 # 是否显示图像，0否1是
 show = 1
-# 截取摄像头局部范围，左上角坐标、右下角坐标（摄像头范围大时需要截取，crop2为"0, 0"时不截取），截取范围长宽比为16:9
+# 截取摄像头局部范围，左上角坐标、右下角坐标（摄像头范围大时需要截取，crop2为"0, 0"时不截取），截取范围长宽比为16:9或16:10，好映射屏幕
 crop1 = 0, 0
 crop2 = 0, 0
 ```
