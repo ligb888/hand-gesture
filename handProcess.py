@@ -14,7 +14,7 @@ class HandProcess:
         # 调用mediapipe的Hands函数，输入手指关节检测的置信度和上一帧跟踪的置信度，输入最多检测手的数目，进行关节点检测
         self.hands = self.mp_hands.Hands(static_image_mode=static_image_mode,
                                          min_detection_confidence=0.7,
-                                         min_tracking_confidence=0.5,
+                                         min_tracking_confidence=0.7,
                                          max_num_hands=max_num_hands)
         # 初始化一个列表来存储
         self.landmark_list = []
@@ -33,7 +33,8 @@ class HandProcess:
             'scroll_up': '向上滑页',
             'scroll_down': '向下滑页',
             'drag': '鼠标拖拽',
-            'enter': '回车'
+            'five': '五指',
+            'zero': '握拳'
         }
         self.action_deteted = ''
 
@@ -124,16 +125,13 @@ class HandProcess:
         if upList == [0, 0, 1, 1, 1]:
             action = 'scroll_down'
 
-        # 回车：五指
-        # if upList == [1, 1, 1, 1, 1]:
-        #     action = 'enter'
+        # 五指
+        if upList == [1, 1, 1, 1, 1]:
+            action = 'five'
 
-        # 拖拽：拇指、食指外的三指向上
-        # 暂改为两指拖动
-        # if upList == [0, 0, 1, 1, 1]:
-        #     # 换成中指
-        #     key_point = self.getFingerXY(12)
-        #     action = 'drag'
+        # 握拳
+        if upList == [0, 0, 0, 0, 0]:
+            action = 'zero'
 
         # 根据动作绘制相关点
         img = self.drawInfo(img, action) if drawKeyFinger else img
@@ -217,14 +215,6 @@ class HandProcess:
             hand_landmarks = results.multi_hand_landmarks[curr_i]
             self.landmark_world_list = results.multi_hand_world_landmarks[curr_i].landmark
 
-            if show:
-                self.mp_drawing.draw_landmarks(
-                    img,
-                    hand_landmarks,
-                    self.mp_hands.HAND_CONNECTIONS,
-                    self.mp_drawing_styles.get_default_hand_landmarks_style(),
-                    self.mp_drawing_styles.get_default_hand_connections_style())
-
             # 遍历landmark
             for landmark_id, finger_axis in enumerate(hand_landmarks.landmark):
                 h, w, c = img.shape
@@ -235,8 +225,17 @@ class HandProcess:
                     finger_axis.z
                 ])
 
-            # 框框和label
+            # 图像显示
             if show:
+                # 手部连线
+                self.mp_drawing.draw_landmarks(
+                    img,
+                    hand_landmarks,
+                    self.mp_hands.HAND_CONNECTIONS,
+                    self.mp_drawing_styles.get_default_hand_landmarks_style(),
+                    self.mp_drawing_styles.get_default_hand_connections_style())
+
+                # 框和label
                 x_min, x_max = min(self.landmark_list, key=lambda i: i[1])[1], \
                 max(self.landmark_list, key=lambda i: i[1])[1]
                 y_min, y_max = min(self.landmark_list, key=lambda i: i[2])[2], \
