@@ -37,12 +37,12 @@ class VirtualMouse:
         else:
             cap = cv2.VideoCapture(self.index)
         # 返回电脑屏幕的宽和高(1920.0, 1080.0)
-        # wScr, hScr = autopy.screen.size()
-        wScr, hScr = pyautogui.size()
+        wScr, hScr = autopy.screen.size()
+        scale = autopy.screen.scale()
         # 获取视频宽度、高度
         wCam = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         hCam = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        logging.info(rf"屏幕分辨率：{wScr},{hScr}")
+        logging.info(rf"屏幕分辨率：{wScr * scale},{hScr * scale}")
         logging.info(rf"摄像头分辨率：{wCam},{hCam}")
         if wCam < 500:
             messagebox.showerror("错误", "摄像头分辨率太低")
@@ -102,6 +102,12 @@ class VirtualMouse:
                     # 柔和处理,通过限制步长，让鼠标移动平滑
                     finalX = stepX + (x3 - stepX) / smooth
                     finalY = stepY + (y3 - stepY) / smooth
+
+                    if finalX > wScr:
+                        finalX = wScr
+                    if finalY > hScr:
+                        finalY = hScr
+
                     # 计时停止，用于计算帧率
                     now = time.time()
                     # 判断鼠标为点击状态
@@ -111,6 +117,7 @@ class VirtualMouse:
                             pyautogui.mouseDown(button='left')
                             mouseDown = True
                         autopy.mouse.move(finalX, finalY)
+                        # pyautogui.moveTo(finalX, finalY)
                     else:
                         # 如果鼠标上一个状态是点击，则判断为放开鼠标左键
                         if mouseDown:
@@ -124,6 +131,7 @@ class VirtualMouse:
                     # 根据识别得到的鼠标手势，控制鼠标做出相应的动作
                     if action_zh == '鼠标移动':
                         autopy.mouse.move(finalX, finalY)
+                        # pyautogui.moveTo(finalX, finalY)
                     elif action_zh == '单击准备':
                         pass
                     elif action_zh == '触发单击' and action_last != action_zh:
