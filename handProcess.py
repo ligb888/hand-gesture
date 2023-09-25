@@ -1,3 +1,5 @@
+import logging
+
 import cv2
 import mediapipe as mp
 import math
@@ -20,8 +22,10 @@ class HandProcess:
         self.landmark_list = []
         self.landmark_world_list = []
         self.landmark_distance_list = []
-        # 历史手势
+        # 手势历史
         self.action_history = []
+        # 关键动作历史
+        self.key_action_history = []
         # 定义所有的手势动作对应的鼠标操作
         self.action_labels = {
             'none': '无',
@@ -34,7 +38,8 @@ class HandProcess:
             'scroll_down': '向下滑页',
             'drag': '鼠标拖拽',
             'five': '五指',
-            'zero': '握拳'
+            'zero': '握拳',
+            'enter': '回车'
         }
         self.action_deteted = ''
 
@@ -138,18 +143,34 @@ class HandProcess:
 
         self.action_deteted = self.action_labels[action]
 
+        # 动作存入历史，并尝试清理
         self.action_history.append(action)
         if len(self.action_history) > 100:
             self.action_history = self.action_history[:-30]
-        if action == "move":
-            flag = True
-            action_last_arr = self.action_history[-5:]
-            for i, item in enumerate(action_last_arr):
-                if item != action:
-                    flag = False
-                    break
-            if not flag:
-                action = "none"
+
+        # 关键动作停留超过5帧
+        flag = True
+        action_last_arr = self.action_history[-5:]
+        for i, item in enumerate(action_last_arr):
+            if item != action:
+                flag = False
+                break
+        # 关键动作存入关键动作历史，并尝试清理
+        if flag is True:
+            self.key_action_history.append(action)
+            if len(self.key_action_history) > 100:
+                self.key_action_history = self.key_action_history[:-30]
+        # 上两帧关键动作
+        last_key_action = self.key_action_history[-2:]
+
+        # 移动没有超过5帧，不算移动，减少抖动的发生
+        if action == "move" and not flag:
+            action = "none"
+
+        # 两个关键动作触发一个新的操作
+        if len(last_key_action) == 2 and last_key_action[0] == "zero" and last_key_action[1] == "five":
+            action = "enter"
+
         return img, action, key_point
 
     def distance(self, lm1, lm2):

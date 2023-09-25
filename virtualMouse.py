@@ -1,5 +1,7 @@
 import math
 import copy
+import traceback
+
 import cv2
 import handProcess
 import time
@@ -156,6 +158,6 @@ class VirtualMouse:
                                                          textColor=(255, 0, 255), textSize=50)
                     cv2.imshow('virtual mouse', self.image)
             except:
-                pass
+                logging.info("图像识别出错：" + traceback.format_exc())
 
         cap.release()
