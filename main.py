@@ -21,8 +21,8 @@ if __name__ == '__main__':
         config.read('config.ini')
         index = int(config['common']['index'])
         rtsp = config['common']['rtsp']
-        cap_width = config['common']['cap_width']
-        cap_height = config['common']['cap_height']
+        cap_width = int(config['common']['cap_width'])
+        cap_height = int(config['common']['cap_height'])
         cap_fps = int(config['common']['cap_fps'])
         hand = config['common']['hand']
         smooth = int(config['common']['smooth'])
