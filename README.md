@@ -30,7 +30,10 @@ python main.py
 index = 0
 # rtsp推流地址
 rtsp = rtsp://{self.user}:{self.pwd}@{self.ip}/cam/realmonitor?channel=1&subtype=0
-# 识别左手还是右手，（如果识别到多只左手或右手，会选取第一只识别到的手）
+# 摄像头的分辨率和帧率
+cap_width = 1920
+cap_height = 1080
+cap_fps = 60# 识别左手还是右手，（如果识别到多只左手或右手，会选取第一只识别到的手）
 hand = Right
 # 鼠标移动平滑参数
 smooth = 4

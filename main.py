@@ -21,6 +21,9 @@ if __name__ == '__main__':
         config.read('config.ini')
         index = int(config['common']['index'])
         rtsp = config['common']['rtsp']
+        cap_width = config['common']['cap_width']
+        cap_height = config['common']['cap_height']
+        cap_fps = int(config['common']['cap_fps'])
         hand = config['common']['hand']
         smooth = int(config['common']['smooth'])
         show = config['common']['show'] == "1"
@@ -28,16 +31,18 @@ if __name__ == '__main__':
         crop1 = (int(crop1_arr[0]), int(crop1_arr[1]))
         crop2_arr = config['common']['crop2'].split(",")
         crop2 = (int(crop2_arr[0]), int(crop2_arr[1]))
+        if not math.isclose(cap_width / cap_height, 1.68, abs_tol=0.1):
+            messagebox.showerror("错误", "摄像头分辨率长宽比必须为16:9或16:10")
+            exit()
+        if cap_fps < 24:
+            messagebox.showerror("错误", "摄像头帧率最低为24")
+            exit()
         if crop2 != (0, 0) and not math.isclose((crop2[0] - crop1[0]) / (crop2[1] - crop1[1]), 1.68, abs_tol=0.1):
             messagebox.showerror("错误", "截取范围长宽比必须为16:9或16:10")
             exit()
         elif crop2 != (0, 0) and crop2[0] - crop1[0] < 500:
             messagebox.showerror("错误", "截取范围分辨率太低")
             exit()
-        # pt1_arr = config['common']['pt1'].split(",")
-        # pt1 = (int(pt1_arr[0]), int(pt1_arr[1]))
-        # pt2_arr = config['common']['pt2'].split(",")
-        # pt2 = (int(pt2_arr[0]), int(pt2_arr[1]))
 
         # 将摄像图片转换为指定分辨率，在一个范围内映射屏幕坐标
         w, h = 1280, 720
@@ -45,7 +50,7 @@ if __name__ == '__main__':
 
         logging.info("读取配置完成")
         control = VirtualMouse(index, rtsp, hand, show)
-        control.recognize(crop1, crop2, w, h, pt1, pt2, smooth)
+        control.recognize(cap_width, cap_height, cap_fps, crop1, crop2, w, h, pt1, pt2, smooth)
     except:
         logging.info("读取配置出错：" + traceback.format_exc())
         exit()

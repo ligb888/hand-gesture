@@ -24,7 +24,7 @@ class VirtualMouse:
         self.show = show
 
     # 主函数
-    def recognize(self, crop1, crop2, w, h, pt1, pt2, smooth):
+    def recognize(self, cap_width, cap_height, cap_fps, crop1, crop2, w, h, pt1, pt2, smooth):
         # 调用手势识别类
         handprocess = handProcess.HandProcess(False, 1)
         # 初始化基础工具：绘制图像，绘制文本等
@@ -33,12 +33,16 @@ class VirtualMouse:
         fpsTime = time.time()
         # 初始化OpenCV对象，为了获取usb摄像头的图像
         if self.index == -1:
-            cap = cv2.VideoCapture(self.rtsp)
+            cap = cv2.VideoCapture(self.rtsp, cv2.CAP_DSHOW)
         else:
-            cap = cv2.VideoCapture(self.index)
-        # 返回电脑屏幕的宽和高(1920.0, 1080.0)
+            cap = cv2.VideoCapture(self.index, cv2.CAP_DSHOW)
+        # 返回电脑屏幕的宽和高（坐标点和每个坐标的像素值）
         wScr, hScr = autopy.screen.size()
         scale = autopy.screen.scale()
+        # 设置摄像头分辨率、帧率
+        cap.set(cv2.CAP_PROP_FRAME_WIDTH, cap_width)
+        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, cap_height)
+        cap.set(cv2.CAP_PROP_FPS, cap_fps)
         # 获取视频宽度、高度
         wCam = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         hCam = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
@@ -67,7 +71,7 @@ class VirtualMouse:
         while cap.isOpened():#只要相机持续打开，则不间断循环
             try:
                 # 等待5毫秒，判断按键是否为Esc，判断窗口是否正常，来控制程序退出
-                if cv2.waitKey(10) & 0xFF == 27:
+                if cv2.waitKey(1) & 0xFF == 27:
                     break
                 # 获取视频的一帧图像，返回值两个。第一个为判断视频是否成功获取。第二个为获取的图像，若未成功获取，返回none
                 success, img = cap.read()
@@ -78,7 +82,8 @@ class VirtualMouse:
                 # 镜像，需要根据镜头位置来调整
                 img = cv2.flip(img, 1)
                 # 深度拷贝
-                self.image = copy.deepcopy(img)
+                self.image = img
+                # self.image = copy.deepcopy(img)
                 # 将图片格式设置为只读状态，可以提高图片格式转化的速度
                 self.image.flags.writeable = False
                 # 截图部分区域，进行手势识别
