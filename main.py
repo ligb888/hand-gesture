@@ -24,6 +24,7 @@ if __name__ == '__main__':
         cap_width = int(config['common']['cap_width'])
         cap_height = int(config['common']['cap_height'])
         cap_fps = int(config['common']['cap_fps'])
+        cap_flip = int(config['common']['cap_flip'])
         hand = config['common']['hand']
         smooth = int(config['common']['smooth'])
         show = config['common']['show'] == "1"
@@ -50,7 +51,7 @@ if __name__ == '__main__':
 
         logging.info("读取配置完成")
         control = VirtualMouse(index, rtsp, hand, show)
-        control.recognize(cap_width, cap_height, cap_fps, crop1, crop2, w, h, pt1, pt2, smooth)
+        control.recognize(cap_width, cap_height, cap_fps, cap_flip, crop1, crop2, w, h, pt1, pt2, smooth)
     except:
         logging.info("读取配置出错：" + traceback.format_exc())
         exit()

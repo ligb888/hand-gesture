@@ -149,22 +149,28 @@ class HandProcess:
             self.action_history = self.action_history[:-30]
 
         # 关键动作停留超过5帧
-        flag = True
+        # flag = True
+        key_action = "none"
+        action_map = {}
         action_last_arr = self.action_history[-5:]
         for i, item in enumerate(action_last_arr):
-            if item != action:
-                flag = False
-                break
+            count = 1
+            if item in action_map:
+                count = action_map[item] + 1
+            action_map[item] = count
+            if count >= 3:
+                key_action = item
+
         # 关键动作存入关键动作历史，并尝试清理
-        if flag is True:
-            self.key_action_history.append(action)
+        if key_action != "none":
+            self.key_action_history.append(key_action)
             if len(self.key_action_history) > 100:
                 self.key_action_history = self.key_action_history[:-30]
         # 上两帧关键动作
         last_key_action = self.key_action_history[-2:]
 
-        # 移动没有超过5帧，不算移动，减少抖动的发生
-        if action == "move" and not flag:
+        # 关键动作没有超过5帧，不执行，减少抖动的发生
+        if (action == "move" and key_action != "move") or (action == "drag" and key_action != "drag"):
             action = "none"
 
         # 两个关键动作触发一个新的操作
@@ -209,7 +215,8 @@ class HandProcess:
 
         # 其他指头，比较距手掌根部的距离
         for i in range(1, 5):
-            if self.landmark_distance_list[fingerTipIndexs[i]] > self.landmark_distance_list[fingerTipIndexs[i] - 2]:
+            diff = self.landmark_distance_list[fingerTipIndexs[i]] - self.landmark_distance_list[fingerTipIndexs[i] - 2]
+            if diff > 0 and diff / self.landmark_distance_list[fingerTipIndexs[i]] > 0.1:
                 upList.append(1)
             else:
                 upList.append(0)

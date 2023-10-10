@@ -24,7 +24,7 @@ class VirtualMouse:
         self.show = show
 
     # 主函数
-    def recognize(self, cap_width, cap_height, cap_fps, crop1, crop2, w, h, pt1, pt2, smooth):
+    def recognize(self, cap_width, cap_height, cap_fps, cap_flip, crop1, crop2, w, h, pt1, pt2, smooth):
         # 调用手势识别类
         handprocess = handProcess.HandProcess(False, 1)
         # 初始化基础工具：绘制图像，绘制文本等
@@ -80,7 +80,8 @@ class VirtualMouse:
                     logging.info("空帧")
                     continue
                 # 镜像，需要根据镜头位置来调整
-                img = cv2.flip(img, 1)
+                if cap_flip > -2:
+                    img = cv2.flip(img, cap_flip)
                 # 深度拷贝
                 self.image = img
                 # self.image = copy.deepcopy(img)
