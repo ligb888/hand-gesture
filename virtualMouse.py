@@ -15,13 +15,14 @@ from tkinter import messagebox
 
 # 识别控制类
 class VirtualMouse:
-    def __init__(self, index=0, rtsp="", hand="Right", show=False):
+    def __init__(self, index=0, rtsp="", hand="Right", show=False, trigger=0):
         # image实例，以便另一个类调用
         self.image = None
         self.index = index
         self.rtsp = rtsp
         self.hand = hand
         self.show = show
+        self.trigger = trigger
 
     # 主函数
     def recognize(self, cap_width, cap_height, cap_fps, cap_flip, crop1, crop2, w, h, pt1, pt2, smooth):
@@ -101,7 +102,7 @@ class VirtualMouse:
                 # 通过手势识别得到手势动作，将其画在图像上显示
                 action_zh = handprocess.action_labels[action]
 
-                if key_point:
+                if key_point and self.trigger == 1:
                     x3 = np.interp(key_point[0], (pt1[0], pt2[0]), (0, wScr))
                     y3 = np.interp(key_point[1], (pt1[1], pt2[1]), (0, hScr))
 

@@ -187,6 +187,11 @@ class HandProcess:
             z = lm1.z - lm2.z
         return math.sqrt(x ** 2 + y ** 2 + z ** 2)
 
+    def distance2(self, lm1, lm2):
+        x = lm1[1] - lm2[1]
+        y = lm1[2] - lm2[2]
+        return math.sqrt(x ** 2 + y ** 2)
+
     def lm_distance(self):
         self.landmark_distance_list = []
         lm0 = self.landmark_world_list[0]
@@ -220,6 +225,15 @@ class HandProcess:
                 upList.append(1)
             else:
                 upList.append(0)
+
+        # for i in range(1, 5):
+        #     dis1 = self.distance2(self.landmark_list[fingerTipIndexs[i]], self.landmark_list[fingerTipIndexs[i] - 3])
+        #     dis2 = self.distance2(self.landmark_list[fingerTipIndexs[i] - 2], self.landmark_list[fingerTipIndexs[i] - 3])
+        #     diff = dis1 - dis2
+        #     if diff > 0 and diff / dis1 > 0.35 and dis2 / dis1 > 0.35:
+        #         upList.append(1)
+        #     else:
+        #         upList.append(0)
 
         return upList
 

@@ -32,6 +32,7 @@ if __name__ == '__main__':
         crop1 = (int(crop1_arr[0]), int(crop1_arr[1]))
         crop2_arr = config['common']['crop2'].split(",")
         crop2 = (int(crop2_arr[0]), int(crop2_arr[1]))
+        trigger = int(config['common']['trigger'])
         if not math.isclose(cap_width / cap_height, 1.68, abs_tol=0.1):
             messagebox.showerror("错误", "摄像头分辨率长宽比必须为16:9或16:10")
             exit()
@@ -50,7 +51,7 @@ if __name__ == '__main__':
         pt1, pt2 = (100, 100), (1180, 620)
 
         logging.info("读取配置完成")
-        control = VirtualMouse(index, rtsp, hand, show)
+        control = VirtualMouse(index, rtsp, hand, show, trigger)
         control.recognize(cap_width, cap_height, cap_fps, cap_flip, crop1, crop2, w, h, pt1, pt2, smooth)
     except:
         logging.info("读取配置出错：" + traceback.format_exc())
