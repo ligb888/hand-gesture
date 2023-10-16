@@ -62,7 +62,8 @@ class VirtualMouse:
             'single_click': 0,
             'double_click': 0,
             'right_click': 0,
-            'enter': 0
+            'close_open': 0,
+            'move': 0
         }
         # 用此变量记录鼠标是否处于按下状态
         mouseDown = False
@@ -130,19 +131,20 @@ class VirtualMouse:
                         if mouseDown:
                             pyautogui.mouseUp(button='left')
                             mouseDown = False
-                    # 回车
-                    if action_zh == '回车' and action_last != action_zh \
-                            and (now - action_trigger_time['enter'] > 1):
-                        pyautogui.press('enter')
-                        action_trigger_time['enter'] = now
+                    # 组合手势：握拳张开
+                    if action_zh == '握拳张开' and action_last != action_zh \
+                            and (now - action_trigger_time['close_open'] > 1):
+                        pyautogui.press('tab')
+                        action_trigger_time['close_open'] = now
                     # 根据识别得到的鼠标手势，控制鼠标做出相应的动作
-                    if action_zh == '鼠标移动':
+                    if action_zh == '鼠标移动' and (now - action_trigger_time['move'] > 0.3):
                         autopy.mouse.move(finalX, finalY)
                         # pyautogui.moveTo(finalX, finalY)
                     elif action_zh == '单击准备':
                         pass
                     elif action_zh == '触发单击' and action_last != action_zh:
                         pyautogui.click()
+                        action_trigger_time['move'] = now
                     elif action_zh == '右击准备':
                         pass
                     elif action_zh == '触发右击' and action_last != action_zh \
@@ -171,7 +173,8 @@ class VirtualMouse:
                     fpsTime = cTime
                     self.image = utils.cv2AddChineseText(self.image, "帧率: " + str(int(fps_text)), (10, 30),
                                                          textColor=(255, 0, 255), textSize=50)
-                    cv2.imshow('virtual mouse', self.image)
+                    cv2.imshow('gesture', self.image)
+                    cv2.setWindowProperty("gesture", cv2.WND_PROP_TOPMOST, 1)
             except:
                 logging.info("图像识别出错：" + traceback.format_exc())
 

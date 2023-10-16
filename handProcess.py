@@ -39,7 +39,7 @@ class HandProcess:
             'drag': '鼠标拖拽',
             'five': '五指',
             'zero': '握拳',
-            'enter': '回车'
+            'close_open': '握拳张开'
         }
         self.action_deteted = ''
 
@@ -69,8 +69,9 @@ class HandProcess:
             img = cv2.circle(img, indexXY, 20, (255, 0, 255), -1)
 
         elif action == 'click_single_active':
-            middle_point = int((indexXY[0] + thumbXY[0]) / 2), int((indexXY[1] + thumbXY[1]) / 2)
-            img = cv2.circle(img, middle_point, 30, (0, 255, 0), -1)
+            # middle_point = int((indexXY[0] + thumbXY[0]) / 2), int((indexXY[1] + thumbXY[1]) / 2)
+            # img = cv2.circle(img, middle_point, 30, (0, 255, 0), -1)
+            img = cv2.circle(img, indexXY, 30, (0, 255, 0), -1)
 
         elif action == 'click_single_ready':
             img = cv2.circle(img, indexXY, 20, (255, 0, 255), -1)
@@ -79,8 +80,9 @@ class HandProcess:
 
 
         elif action == 'click_right_active':
-            middle_point = int((indexXY[0] + middleXY[0]) / 2), int((indexXY[1] + middleXY[1]) / 2)
-            img = cv2.circle(img, middle_point, 30, (0, 255, 0), -1)
+            # middle_point = int((indexXY[0] + middleXY[0]) / 2), int((indexXY[1] + middleXY[1]) / 2)
+            # img = cv2.circle(img, middle_point, 30, (0, 255, 0), -1)
+            img = cv2.circle(img, indexXY, 30, (0, 255, 0), -1)
 
         elif action == 'click_right_ready':
             img = cv2.circle(img, indexXY, 20, (255, 0, 255), -1)
@@ -108,18 +110,19 @@ class HandProcess:
 
         # 单击：食指与拇指出现暂停移动，如果两指捏合，触发单击
         if upList == [1, 1, 0, 0, 0]:
-            l1 = self.getDistance(self.getFingerXY(4), self.getFingerXY(8))
-            action = 'click_single_active' if l1 < dete_dist else 'click_single_ready'
+            # l1 = self.getDistance(self.getFingerXY(4), self.getFingerXY(8))
+            # action = 'click_single_active' if l1 < dete_dist else 'click_single_ready'
 
-            # 右击：食指、中指出现暂停移动，如果两指捏合，触发右击
-            # 暂改为拖动
+            # 暂改为直接触发单击
+            action = 'click_single_active'
+        # 拖动：食指和中指
         if upList == [0, 1, 1, 0, 0]:
             # l1 = self.getDistance(self.getFingerXY(8), self.getFingerXY(12))
             # action = 'click_right_active' if l1 < dete_dist else 'click_right_ready'
             action = 'drag'
 
         # 右击：大拇指加食指、中指
-        if upList == [1, 1, 1, 0, 0]:
+        if upList == [0, 1, 0, 1, 1] or upList == [0, 1, 0, 0, 1]:
             action = 'click_right_active'
 
         # 向上滑：四指向上
@@ -169,13 +172,15 @@ class HandProcess:
         # 上两帧关键动作
         last_key_action = self.key_action_history[-2:]
 
-        # 关键动作没有超过5帧，不执行，减少抖动的发生
+        # 非关键动作不触发，关键动作覆盖当前动作，减少抖动
         if (action == "move" and key_action != "move") or (action == "drag" and key_action != "drag"):
             action = "none"
+        elif key_action == "move" or key_action != "drag":
+            action = key_action
 
         # 两个关键动作触发一个新的操作
         if len(last_key_action) == 2 and last_key_action[0] == "zero" and last_key_action[1] == "five":
-            action = "enter"
+            action = "close_open"
 
         return img, action, key_point
 
