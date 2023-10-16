@@ -94,7 +94,7 @@ class HandProcess:
         return img
 
     # 返回手掌各种动作
-    def checkHandAction(self, img, drawKeyFinger=True):
+    def checkHandAction(self, img, show):
         upList = self.checkFingersUp()
         action = 'none'
 
@@ -144,7 +144,8 @@ class HandProcess:
             action = 'zero'
 
         # 根据动作绘制相关点
-        img = self.drawInfo(img, action) if drawKeyFinger else img
+        if show:
+            self.drawInfo(img, action)
 
         self.action_deteted = self.action_labels[action]
 
@@ -216,7 +217,7 @@ class HandProcess:
         self.lm_distance()
 
         # 拇指，比较距17点的距离
-        dis1 = self.distance(self.landmark_world_list[fingerTipIndexs[0]], self.landmark_world_list[17]) - 0.02
+        dis1 = self.distance(self.landmark_world_list[fingerTipIndexs[0]], self.landmark_world_list[17]) - 0.035
         dis2 = self.distance(self.landmark_world_list[fingerTipIndexs[0]-2], self.landmark_world_list[17])
         # dis1 = (self.landmark_list[fingerTipIndexs[0]][0] - self.landmark_list[17][0]) ** 2 + (self.landmark_list[fingerTipIndexs[0]][1] - self.landmark_list[17][1]) ** 2
         # dis2 = (self.landmark_list[fingerTipIndexs[0]-2][0] - self.landmark_list[17][0]) ** 2 + (self.landmark_list[fingerTipIndexs[0]-2][1] - self.landmark_list[17][1]) ** 2

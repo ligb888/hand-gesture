@@ -100,7 +100,7 @@ class VirtualMouse:
                 self.image = handprocess.processOneHand(self.image, self.hand, self.show)
 
                 # 调用手势识别文件获取手势动作
-                self.image, action, key_point = handprocess.checkHandAction(self.image, drawKeyFinger=self.show)
+                self.image, action, key_point = handprocess.checkHandAction(self.image, self.show)
                 # 通过手势识别得到手势动作，将其画在图像上显示
                 action_zh = handprocess.action_labels[action]
 
@@ -138,7 +138,7 @@ class VirtualMouse:
                         pyautogui.press('tab')
                         action_trigger_time['close_open'] = now
                     # 根据识别得到的鼠标手势，控制鼠标做出相应的动作
-                    if action_zh == '鼠标移动' and (now - action_trigger_time['move'] > 0.3):
+                    if action_zh == '鼠标移动' and (now - action_trigger_time['move'] > 0.5):
                         autopy.mouse.move(finalX, finalY)
                         # pyautogui.moveTo(finalX, finalY)
                     elif action_zh == '单击准备':
