@@ -71,7 +71,9 @@ class HandProcess:
         elif action == 'click_single_active':
             # middle_point = int((indexXY[0] + thumbXY[0]) / 2), int((indexXY[1] + thumbXY[1]) / 2)
             # img = cv2.circle(img, middle_point, 30, (0, 255, 0), -1)
+            # 以前的单击准备改为触发单击
             img = cv2.circle(img, indexXY, 30, (0, 255, 0), -1)
+            img = cv2.circle(img, thumbXY, 30, (0, 255, 0), -1)
 
         elif action == 'click_single_ready':
             img = cv2.circle(img, indexXY, 20, (255, 0, 255), -1)

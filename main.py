@@ -52,7 +52,7 @@ if __name__ == '__main__':
 
         logging.info("读取配置完成")
         control = VirtualMouse(index, rtsp, hand, show, trigger)
-        control.recognize(cap_width, cap_height, cap_fps, cap_flip, crop1, crop2, w, h, pt1, pt2, smooth)
+        control.recognize(cap_width, cap_height, cap_fps, cap_flip, crop1, crop2, smooth)
     except:
         logging.info("读取配置出错：" + traceback.format_exc())
         exit()

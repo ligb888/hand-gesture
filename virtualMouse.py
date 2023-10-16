@@ -25,7 +25,7 @@ class VirtualMouse:
         self.trigger = trigger
 
     # 主函数
-    def recognize(self, cap_width, cap_height, cap_fps, cap_flip, crop1, crop2, w, h, pt1, pt2, smooth):
+    def recognize(self, cap_width, cap_height, cap_fps, cap_flip, crop1, crop2, smooth):
         # 调用手势识别类
         handprocess = handProcess.HandProcess(False, 1)
         # 初始化基础工具：绘制图像，绘制文本等
@@ -49,6 +49,8 @@ class VirtualMouse:
         hCam = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         logging.info(rf"屏幕分辨率：{wScr * scale},{hScr * scale}")
         logging.info(rf"摄像头分辨率：{wCam},{hCam}")
+        pt1 = (int(wCam * 0.05), int(hCam * 0.05))
+        pt2 = (int(wCam * 0.95), int(hCam * 0.95))
         if wCam < 500:
             messagebox.showerror("错误", "摄像头分辨率太低")
             exit()
@@ -84,15 +86,14 @@ class VirtualMouse:
                 # 镜像，需要根据镜头位置来调整
                 if cap_flip > -2:
                     img = cv2.flip(img, cap_flip)
-                # 深度拷贝
                 self.image = img
+                # 深度拷贝，做深度拷贝还是浅拷贝还是不拷贝？
                 # self.image = copy.deepcopy(img)
                 # 将图片格式设置为只读状态，可以提高图片格式转化的速度
                 self.image.flags.writeable = False
                 # 截图部分区域，进行手势识别
                 if crop2 != (0, 0):
                     self.image = self.image[crop1[1]:crop2[1], crop1[0]:crop2[0]]
-                self.image = cv2.resize(self.image, (w, h))
                 # 将BGR格式存储的图片转为RGB
                 self.image = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
                 # 使用mediapipe，将图像输入手指检测模型，得到结果
@@ -164,7 +165,7 @@ class VirtualMouse:
                 # 显示画面
                 if self.show:
                     # 将手框出来
-                    cv2.rectangle(self.image, pt1, pt2, (0, 255, 255), 5)
+                    cv2.rectangle(self.image, pt1, pt2, (0, 255, 255), 10)
                     self.image = cv2.cvtColor(self.image, cv2.COLOR_RGB2BGR)
 
                     # 显示刷新率FPS
@@ -173,6 +174,9 @@ class VirtualMouse:
                     fpsTime = cTime
                     self.image = utils.cv2AddChineseText(self.image, "帧率: " + str(int(fps_text)), (10, 30),
                                                          textColor=(255, 0, 255), textSize=50)
+
+                    # 展示前缩小尺寸，避免占满屏幕
+                    self.image = cv2.resize(self.image, (int(wCam * 0.5), int(hCam * 0.5)))
                     cv2.imshow('gesture', self.image)
                     cv2.setWindowProperty("gesture", cv2.WND_PROP_TOPMOST, 1)
             except:
