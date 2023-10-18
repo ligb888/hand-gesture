@@ -49,8 +49,8 @@ class VirtualMouse:
         hCam = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         logging.info(rf"屏幕分辨率：{wScr * scale},{hScr * scale}")
         logging.info(rf"摄像头分辨率：{wCam},{hCam}")
-        pt1 = (int(wCam * 0.05), int(hCam * 0.05))
-        pt2 = (int(wCam * 0.95), int(hCam * 0.95))
+        pt1 = (int(wCam * 0.08), int(hCam * 0.08))
+        pt2 = (int(wCam * 0.92), int(hCam * 0.92))
         if wCam < 500:
             messagebox.showerror("错误", "摄像头分辨率太低")
             exit()
