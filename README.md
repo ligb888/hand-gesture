@@ -58,7 +58,7 @@ trigger = 1
 ```
 
 # 打包
-执行命令进行打包
+执行命令进行打包（不同的环境打包参数可能需要调整）
 ```shell
 pyinstaller main.py --name="hand-gesture" --add-data="config.ini;." --add-data="venv/Lib/site-packages/mediapipe/modules;mediapipe/modules" -w
 ```
