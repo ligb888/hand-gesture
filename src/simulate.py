@@ -1,20 +1,18 @@
 import math
-import copy
 import traceback
-
 import cv2
-import handProcess
+from src.process import Process
 import time
 import numpy as np
 import pyautogui
-from utils import Utils
+from src.utils import Utils
 import autopy
 import logging
 from tkinter import messagebox
 
 
 # 识别控制类
-class VirtualMouse:
+class Simulate:
     def __init__(self, index=0, rtsp="", hand="Right", show=False, trigger=0):
         # image实例，以便另一个类调用
         self.image = None
@@ -27,7 +25,7 @@ class VirtualMouse:
     # 主函数
     def recognize(self, cap_width, cap_height, cap_fps, cap_flip, crop1, crop2, smooth):
         # 调用手势识别类
-        handprocess = handProcess.HandProcess(False, 1)
+        handprocess = Process(False, 1)
         # 初始化基础工具：绘制图像，绘制文本等
         utils = Utils()
         # 计时，用于帧率计算

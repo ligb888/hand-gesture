@@ -1,7 +1,7 @@
 import math
 import traceback
-import utils
-from virtualMouse import VirtualMouse
+from src import utils
+from src.simulate import Simulate
 import configparser
 import logging
 from tkinter import messagebox
@@ -46,12 +46,8 @@ if __name__ == '__main__':
             messagebox.showerror("错误", "截取范围分辨率太低")
             exit()
 
-        # 将摄像图片转换为指定分辨率，在一个范围内映射屏幕坐标
-        w, h = 1280, 720
-        pt1, pt2 = (100, 100), (1180, 620)
-
         logging.info("读取配置完成")
-        control = VirtualMouse(index, rtsp, hand, show, trigger)
+        control = Simulate(index, rtsp, hand, show, trigger)
         control.recognize(cap_width, cap_height, cap_fps, cap_flip, crop1, crop2, smooth)
     except:
         logging.info("读取配置出错：" + traceback.format_exc())

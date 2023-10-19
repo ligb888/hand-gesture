@@ -1,12 +1,11 @@
 import logging
-
 import cv2
 import mediapipe as mp
 import math
-from utils import Utils
+from src.utils import Utils
 
 
-class HandProcess:
+class Process:
 
     def __init__(self, static_image_mode=False, max_num_hands=2):
         # 参数
